@@ -8,7 +8,6 @@ import {
 } from './js/markup';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-import InfiniteScroll from 'infinite-scroll';
 
 const refs = {
   header: document.querySelector('.header-section'),
@@ -16,12 +15,12 @@ const refs = {
   input: document.querySelector('.search-input'),
   searchBtn: document.querySelector('.search-button'),
   gallery: document.querySelector('.gallery'),
-  //   loadMoreBtn: document.querySelector('.load-more'),
+  loadMoreBtn: document.querySelector('.load-more'),
   endGallery: document.querySelector('.end-gallery '),
 };
 
 refs.form.addEventListener('submit', createGallery);
-// refs.loadMoreBtn.addEventListener('click', appendToGallery);
+refs.loadMoreBtn.addEventListener('click', appendToGallery);
 
 const lightbox = new SimpleLightbox('.gallery a');
 const { height: heightHeader } = refs.header.getBoundingClientRect();
@@ -39,7 +38,7 @@ async function createGallery(event) {
   event.preventDefault();
   newSearch.page = 1;
 
-  //   addClass(refs.loadMoreBtn, 'is-hidden');
+  addClass(refs.loadMoreBtn, 'is-hidden');
   addClass(refs.endGallery, 'is-hidden');
   resetGalleryMarkup(refs.gallery);
   getInputValue(event);
@@ -55,33 +54,18 @@ async function createGallery(event) {
 
   lightbox.refresh();
 
-  let infScroll = new InfiniteScroll(refs.gallery, {
-    path: '.gallery a',
-    append: 'photo-card',
-    history: false,
-    status: '.scroll-status',
-  });
-
-  infScroll.on('append', function (response, path, items) {
-    newSearch.page += 1;
-    getSearchData()
-      .then(parseSearchData)
-      .then(() => {
-        showGalleryEnd(response);
-        lightbox.refresh();
-      });
-  });
-
   newSearch.page += 1;
 }
 
-// async function appendToGallery() {
-//   const searchData = await getSearchData();
-//   parseSearchData(searchData);
-//   showGalleryEnd(searchData);
+async function appendToGallery() {
+  const searchData = await getSearchData();
+  parseSearchData(searchData);
+  showGalleryEnd(searchData);
 
-//   newSearch.page += 1;
-// }
+  lightbox.refresh();
+
+  newSearch.page += 1;
+}
 
 /* ---------------------------------- */
 
@@ -108,12 +92,12 @@ function showMessage(data) {
 
 function showGalleryEnd(data) {
   if (refs.gallery.childElementCount === data.totalHits && data.totalHits > 0) {
-    // addClass(refs.loadMoreBtn, 'is-hidden');
+    addClass(refs.loadMoreBtn, 'is-hidden');
     removeClass(refs.endGallery, 'is-hidden');
     return;
   }
 
-  //   if (refs.loadMoreBtn.classList.contains('is-hidden') && data.totalHits > 0) {
-  //     removeClass(refs.loadMoreBtn, 'is-hidden');
-  //   }
+  if (refs.loadMoreBtn.classList.contains('is-hidden') && data.totalHits > 0) {
+    removeClass(refs.loadMoreBtn, 'is-hidden');
+  }
 }
