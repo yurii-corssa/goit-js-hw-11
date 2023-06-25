@@ -20,7 +20,6 @@ const refs = {
 };
 
 refs.form.addEventListener('submit', createGallery);
-refs.loadMoreBtn.addEventListener('click', appendToGallery);
 
 const lightbox = new SimpleLightbox('.gallery a');
 const { height: heightHeader } = refs.header.getBoundingClientRect();
@@ -54,6 +53,8 @@ async function createGallery(event) {
 
   lightbox.refresh();
 
+  window.addEventListener('scroll', detectScrollEnd);
+
   newSearch.page += 1;
 }
 
@@ -63,6 +64,8 @@ async function appendToGallery() {
   showGalleryEnd(searchData);
 
   lightbox.refresh();
+
+  window.addEventListener('scroll', detectScrollEnd);
 
   newSearch.page += 1;
 }
@@ -99,5 +102,18 @@ function showGalleryEnd(data) {
 
   if (refs.loadMoreBtn.classList.contains('is-hidden') && data.totalHits > 0) {
     removeClass(refs.loadMoreBtn, 'is-hidden');
+  }
+}
+
+function detectScrollEnd() {
+  const { bottom } = document.documentElement.getBoundingClientRect();
+  const clientHeight = document.documentElement.clientHeight;
+
+  console.log(bottom);
+  console.log(clientHeight + 450);
+
+  if (bottom < clientHeight + 450) {
+    window.removeEventListener('scroll', detectScrollEnd);
+    appendToGallery();
   }
 }
