@@ -36,7 +36,7 @@ export class SearchImages {
     )
       .then(responce => responce.json())
       .then(data => {
-        if (data.hits.length === 0) {
+        if (data.hits.length === 0 && this.page === 1) {
           Notify.failure(
             'Sorry, there are no images matching your search query. Please try again.'
           );

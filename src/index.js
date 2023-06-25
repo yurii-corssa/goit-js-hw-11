@@ -1,11 +1,6 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { SearchImages } from './js/pixabay-api';
-import {
-  createCardMarkup,
-  resetGalleryMarkup,
-  removeClass,
-  addClass,
-} from './js/markup';
+import * as markup from './js/markup';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
@@ -37,37 +32,38 @@ async function createGallery(event) {
   event.preventDefault();
   newSearch.page = 1;
 
-  addClass(refs.loadMoreBtn, 'is-hidden');
-  addClass(refs.endGallery, 'is-hidden');
-  resetGalleryMarkup(refs.gallery);
+  markup.addClass(refs.loadMoreBtn, 'is-hidden');
+  markup.addClass(refs.endGallery, 'is-hidden');
+  markup.resetGalleryMarkup(refs.gallery);
   getInputValue(event);
   const searchData = await getSearchData();
+
+  if (!searchData) return;
+
   parseSearchData(searchData);
   showMessage(searchData);
   showGalleryEnd(searchData);
 
+  newSearch.page += 1;
+  lightbox.refresh();
+  window.addEventListener('scroll', detectScrollEnd);
   window.scrollBy({
     top: heightHeader,
     behavior: 'smooth',
   });
-
-  lightbox.refresh();
-
-  window.addEventListener('scroll', detectScrollEnd);
-
-  newSearch.page += 1;
 }
 
 async function appendToGallery() {
   const searchData = await getSearchData();
+
+  if (!searchData) return;
+
   parseSearchData(searchData);
   showGalleryEnd(searchData);
 
-  lightbox.refresh();
-
-  window.addEventListener('scroll', detectScrollEnd);
-
   newSearch.page += 1;
+  lightbox.refresh();
+  window.addEventListener('scroll', detectScrollEnd);
 }
 
 /* ---------------------------------- */
@@ -83,7 +79,7 @@ function getSearchData() {
 
 function parseSearchData(data) {
   for (const imageData of data.hits) {
-    createCardMarkup(refs.gallery, imageData);
+    markup.createCardMarkup(refs.gallery, imageData);
   }
 }
 
@@ -94,23 +90,20 @@ function showMessage(data) {
 }
 
 function showGalleryEnd(data) {
-  if (refs.gallery.childElementCount === data.totalHits && data.totalHits > 0) {
-    addClass(refs.loadMoreBtn, 'is-hidden');
-    removeClass(refs.endGallery, 'is-hidden');
+  if (refs.gallery.childElementCount >= data.totalHits && data.totalHits > 0) {
+    markup.addClass(refs.loadMoreBtn, 'is-hidden');
+    markup.removeClass(refs.endGallery, 'is-hidden');
     return;
   }
 
   if (refs.loadMoreBtn.classList.contains('is-hidden') && data.totalHits > 0) {
-    removeClass(refs.loadMoreBtn, 'is-hidden');
+    markup.removeClass(refs.loadMoreBtn, 'is-hidden');
   }
 }
 
 function detectScrollEnd() {
   const { bottom } = document.documentElement.getBoundingClientRect();
   const clientHeight = document.documentElement.clientHeight;
-
-  console.log(bottom);
-  console.log(clientHeight + 450);
 
   if (bottom < clientHeight + 450) {
     window.removeEventListener('scroll', detectScrollEnd);
